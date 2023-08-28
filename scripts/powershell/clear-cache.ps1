@@ -1,0 +1,1 @@
+Get-ChildItem -Path ./cache -Include *.* -Recurse | foreach { $_.Delete()}

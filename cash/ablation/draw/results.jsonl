@@ -1,0 +1,5 @@
+{"label":"All features","recall":0.7020467836,"precision":0.4292050533,"f1":0.529222034,"auc_score":0.5573937123,"accuracy":0.7682277228}
+{"label":"Entropy\n(removed)","recall":0.6970760234,"precision":0.3886758451,"f1":0.4958536667,"auc_score":0.5625262767,"accuracy":0.7402673267}
+{"label":"Gini Impurity\n(removed)","recall":0.7295321637,"precision":0.4126416301,"f1":0.5238525848,"auc_score":0.5506969766,"accuracy":0.7552376238}
+{"label":"Entropy,\nGini Impurity\n(removed)","recall":0.4830409357,"precision":0.2259530525,"f1":0.3061290992,"auc_score":0.2495886154,"accuracy":0.5924257426}
+{"label":"Centroid Distance\n(removed)","recall":0.7070175439,"precision":0.401758943,"f1":0.5104464928,"auc_score":0.5560004918,"accuracy":0.7492277228}
