@@ -6,7 +6,6 @@ import asyncio
 from dotenv import load_dotenv
 
 import openai
-from langchain.llms import OpenAI
 
 load_dotenv()
 openai.organization = os.getenv("OPENAI_ORGANIZATION")
@@ -99,9 +98,17 @@ class ResponseCollector:
                 question_index = question["id"]
                 question_text = question["text"]
 
-                llm = OpenAI(**self.configs)
-                response = llm.generate(question_text)
-                print(response)
+                if self.verbose:
+                    print(f"INFO | ID {question_index} | ASKING: {question_text}")
+
+                payload = {
+                    "messages": [
+                        {"role": "system", "content": self.system_text},
+                        {"role": "user", "content": question_text},
+                    ],
+                    **self.configs,
+                }
+                response = openai.ChatCompletion.create(**payload)
 
                 if self.verbose:
                     print(f"INFO | ID {question_index} | RECEIVED: {response}")
