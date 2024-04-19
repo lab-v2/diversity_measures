@@ -6,7 +6,7 @@ import numpy
 from sentence_transformers import SentenceTransformer
 from scipy.spatial.distance import euclidean
 
-from evals.answer_extraction import extract_last_letters, extract_draw, extract_csqa
+from evals.answer_extraction import extract_last_letters, extract_draw, extract_csqa, extract_stqa
 from utils.read_file import read_file
 from utils import stats
 
@@ -14,13 +14,15 @@ class Dataset(Enum):
     LAST_LETTERS = 0
     CSQA = 1
     DRAW = 2
+    STQA = 3
     
 NUM_SAMPLES = 20
 
 for DATASET in [
     Dataset.LAST_LETTERS,
     Dataset.CSQA,
-    Dataset.DRAW
+    Dataset.DRAW,
+    Dataset.STQA
 ]:
     for VARIATION in [
         'base-T0.3',
@@ -62,6 +64,17 @@ for DATASET in [
             RESPONSE_SAMPLE_NAME = 'choices'
             EXTRACT_RESPONSE = lambda response: response['message']['content']
             ANSWER_EXTRACTION = extract_draw
+            COMPARE_ANSWERS = lambda response, answer: response.issubset(set(answer)) and len(response) > 0
+        if DATASET == Dataset.STQA:
+            QUESTION_SET_FILE_PATH = f'data/question-set/strategyQA.json'
+            RESPONSE_FILE_PATH = f'data/responses/{VARIATION}/strategyQA/sample_0.jsonl'
+            MID_FILE_PATH = f'data/machine-learning/{VARIATION}/strategyQA.jsonl'
+            QUESTION_SET_INDEX_NAME = 'qid'
+            QUESTION_SET_ANSWER_NAME = 'answer'
+            RESPONSE_INDEX_NAME = 'question_id'
+            RESPONSE_SAMPLE_NAME = 'choices'
+            EXTRACT_RESPONSE = lambda response: response['message']['content']
+            ANSWER_EXTRACTION = extract_stqa
             COMPARE_ANSWERS = lambda response, answer: response.issubset(set(answer)) and len(response) > 0
 
         def get_distance(row):

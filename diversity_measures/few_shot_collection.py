@@ -22,6 +22,9 @@ last_letters_df = pandas.read_json(
     os.path.join("data", "test-sets", "last_letters.jsonl"),
     lines=True,
 )
+stqa_df = pandas.read_json(
+    os.path.join("data", "test-sets", "strategyQA.jsonl"), lines=True
+)
 
 draw_few_shots = pandas.read_json(
     os.path.join("data", "prompts", "draw.jsonl"), lines=True
@@ -31,6 +34,10 @@ csqa_few_shots = pandas.read_json(
 )
 last_letters_few_shots = pandas.read_json(
     os.path.join("data", "prompts", "last_letters.jsonl"),
+    lines=True,
+)
+stqas_few_shots = pandas.read_json(
+    os.path.join("data", "prompts", "strategyQA.jsonl"),
     lines=True,
 )
 
@@ -66,6 +73,15 @@ def last_letters_prompt(question_row, few_shots):
 """
     return {"id": index, "text": text}
 
+def stqa_prompt(question_row, few_shots):
+    """A function that is used to format the prompt for the Last Strategy QA dataset."""
+    index = question_row["question_id"]
+    text = f"""
+{few_shots['prompt']}
+{question_row['question']}
+"""
+    return {"id": index, "text": text}
+
 
 # Collect GPT-3.5 responses at various temperature settings
 for setting_name, setting in [
@@ -87,13 +103,15 @@ for setting_name, setting in [
 
     # Collect GPT-3.5 responses for each dataset.
     for name, question_list, func, few_shots in [
-        ("draw", draw_df, draw_prompt, draw_few_shots),
-        ("csqa", csqa_df, csqa_prompt, csqa_few_shots),
-        ("last_letters", last_letters_df, last_letters_prompt, last_letters_few_shots),
+        # ("draw", draw_df, draw_prompt, draw_few_shots),
+        # ("csqa", csqa_df, csqa_prompt, csqa_few_shots),
+        # ("last_letters", last_letters_df, last_letters_prompt, last_letters_few_shots),
+        ("stqa", stqa_df, stqa_prompt, stqas_few_shots),
+
     ]:
         # Collect GPT-3.5 responses for each few-shot variation.
         for index, row in few_shots.iterrows():
-            if index >= 19: break
+            if index > 19: break
             modified_question_list = question_list.apply(
                 lambda question_row: func(question_row, row), axis=1
             ).tolist()

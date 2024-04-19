@@ -34,6 +34,12 @@ def last_letters_prompt(row):
     index = row["iIndex"]
     return {"text": text, "id": index}
 
+def stqa_prompt(row):
+    text = f"Answer yes or no. At the end, say 'the answer is [put your answer here]'.\nQuestion: {row['question']}.\n "
+    # text = row['question']
+    index = row["qid"]
+    return {"text": text, "id": index}
+
 
 draw_df = pandas.read_json(
     os.path.join("data", "question-set", "draw.json"), lines=False
@@ -45,13 +51,16 @@ last_letters_df = pandas.read_json(
     os.path.join("data", "question-set", "last_letters.jsonl"),
     lines=True,
 )
+stqa_df = pandas.read_json(
+    os.path.join("data", "question-set", "strategyQA.json"), lines=False
+)
 
 
 draw_df = draw_df.apply(lambda row: draw_prompt(row), axis=1).to_list()
 csqa_df = csqa_df.apply(lambda row: csqa_prompt(row), axis=1).to_list()
-last_letters_df = last_letters_df.apply(
-    lambda row: last_letters_prompt(row), axis=1
-).to_list()
+last_letters_df = last_letters_df.apply(lambda row: last_letters_prompt(row), axis=1).to_list()
+stqa_df = stqa_df.apply(lambda row: draw_prompt(row), axis=1).to_list()
+
 
 for setting_name, setting in [
     ("T0.3", {"temperature": 0.3}),
@@ -75,9 +84,10 @@ for setting_name, setting in [
     file_path = os.path.join("data", "responses", f"base-{setting_name}")
 
     for name, question_list in [
-        ("draw", draw_df),
-        ("csqa", csqa_df),
-        ("last_letters", last_letters_df),
+        # ("draw", draw_df),
+        # ("csqa", csqa_df),
+        # ("last_letters", last_letters_df),
+        ("stqa", stqa_df)
     ]:
         text = f"Asking {name}"
         text = text + " " * (20 - len(text))

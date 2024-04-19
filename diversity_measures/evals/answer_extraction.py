@@ -41,6 +41,14 @@ def extract_csqa(response: str):
     if len(response) == 0: return ''
     return response[0]
 
+
+def extract_stqa(response: str):
+    response = response.lower()
+    response = extract_answer(response)
+    response = response.strip().replace(".", "").replace(",", "")
+
+    return response
+
 def extract_answer(response: str) -> str:
     response = __clean_response(response)
 
