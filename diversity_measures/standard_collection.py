@@ -59,7 +59,7 @@ stqa_df = pandas.read_json(
 draw_df = draw_df.apply(lambda row: draw_prompt(row), axis=1).to_list()
 csqa_df = csqa_df.apply(lambda row: csqa_prompt(row), axis=1).to_list()
 last_letters_df = last_letters_df.apply(lambda row: last_letters_prompt(row), axis=1).to_list()
-stqa_df = stqa_df.apply(lambda row: draw_prompt(row), axis=1).to_list()
+stqa_df = stqa_df.apply(lambda row: stqa_prompt(row), axis=1).to_list()
 
 
 for setting_name, setting in [
