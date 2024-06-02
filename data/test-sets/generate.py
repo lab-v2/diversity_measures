@@ -1,32 +1,30 @@
 import json
 
-file = 'strategyQA.json'
+file = 'svamp.json'
 path = f'../question-set/{file}'
-output = 'strategyQA.jsonl'
+output = 'svamp.jsonl'
 
-# Load your JSON data
 with open(path, 'r') as file:
     data = json.load(file)
 
-# Prepare a list to store the new simplified records
-# Select the last 100 entries directly
 simplified_records = []
 last_hundred_entries = data[-100:]  # Get the last 100 entries
 
+prompt = "Solve the following math question. At the end, say 'the answer is [put your numbers here separated by commas]'.\n"
+
 # Iterate over the last 100 loaded data
 for item in last_hundred_entries:
-    # Extract the desired fields
+    combined_question = f"{item['Body']} {item['Question']}"
+
     new_record = {
-        "question_id": item["qid"],
-        "question": item["question"],
-        "answer": item["answer"]
+        "question_id": item["ID"],
+        "question": f"{prompt} {combined_question}",
+        "answer": item["Answer"]
     }
     simplified_records.append(new_record)
 
-# Write the new records to a JSONL file
 with open(output, 'w') as outfile:
     for record in simplified_records:
         json.dump(record, outfile)
-        outfile.write('\n')  # Write a newline to separate entries in JSONL format
-
+        outfile.write('\n')  
 print(F"Conversion complete. Saved to '{output}'.")

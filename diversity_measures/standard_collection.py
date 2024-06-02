@@ -40,6 +40,13 @@ def stqa_prompt(row):
     index = row["qid"]
     return {"text": text, "id": index}
 
+def svamp_prompt(row):
+    question = f"{row['Body']} {row['Question']}"
+    text = f"Solve the following math question. At the end, say 'the answer is [put your numbers here separated by commas]'\nQuestion: {question}"
+    index = row["ID"]
+    return {"text": text, "id": index}
+
+
 
 draw_df = pandas.read_json(
     os.path.join("data", "question-set", "draw.json"), lines=False
@@ -54,19 +61,24 @@ last_letters_df = pandas.read_json(
 stqa_df = pandas.read_json(
     os.path.join("data", "question-set", "strategyQA.json"), lines=False
 )
+svamp_df = pandas.read_json(
+    os.path.join("data", "question-set", "svamp.json"), lines=False
+)
+
 
 
 draw_df = draw_df.apply(lambda row: draw_prompt(row), axis=1).to_list()
 csqa_df = csqa_df.apply(lambda row: csqa_prompt(row), axis=1).to_list()
 last_letters_df = last_letters_df.apply(lambda row: last_letters_prompt(row), axis=1).to_list()
 stqa_df = stqa_df.apply(lambda row: stqa_prompt(row), axis=1).to_list()
+svamp_df = svamp_df.apply(lambda row: svamp_prompt(row), axis=1).to_list()
 
 
 for setting_name, setting in [
-    ("T0.3", {"temperature": 0.3}),
-    ("T0.5", {"temperature": 0.5}),
-    ("T0.7", {"temperature": 0.7}),
-    ("T0.8", {"temperature": 0.8}),
+    # ("T0.3", {"temperature": 0.3}),
+    # ("T0.5", {"temperature": 0.5}),
+    # ("T0.7", {"temperature": 0.7}),
+    # ("T0.8", {"temperature": 0.8}),
     ("T0.9", {"temperature": 0.9}),
 ]:
     TIMEOUT = 10000
@@ -87,7 +99,8 @@ for setting_name, setting in [
         # ("draw", draw_df),
         # ("csqa", csqa_df),
         # ("last_letters", last_letters_df),
-        ("stqa", stqa_df)
+        ("stqa", stqa_df),
+        # ("svamp", svamp_df),
     ]:
         text = f"Asking {name}"
         text = text + " " * (20 - len(text))

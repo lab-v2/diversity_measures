@@ -15,14 +15,16 @@ class Dataset(Enum):
     CSQA = 1
     DRAW = 2
     STQA = 3
+    SVAMP = 4
     
 NUM_SAMPLES = 20
 
 for DATASET in [
-    Dataset.LAST_LETTERS,
-    Dataset.CSQA,
-    Dataset.DRAW,
-    Dataset.STQA
+    # Dataset.LAST_LETTERS,
+    # Dataset.CSQA,
+    # Dataset.DRAW,
+    Dataset.STQA,
+    # Dataset.SVAMP
 ]:
     for VARIATION in [
         'base-T0.3',
@@ -67,15 +69,29 @@ for DATASET in [
             COMPARE_ANSWERS = lambda response, answer: response.issubset(set(answer)) and len(response) > 0
         if DATASET == Dataset.STQA:
             QUESTION_SET_FILE_PATH = f'data/question-set/strategyQA.json'
-            RESPONSE_FILE_PATH = f'data/responses/{VARIATION}/strategyQA/sample_0.jsonl'
+            RESPONSE_FILE_PATH = f'data/responses/{VARIATION}/stqa/sample_0.jsonl'
             MID_FILE_PATH = f'data/machine-learning/{VARIATION}/strategyQA.jsonl'
+            FS_RESPONSE_FILE_PATH = f'data/responses/few_shot-T0.7/{VARIATION}/stqa/sample_{NUMBER}.jsonl'
+            FS_MID_FILE_PATH = f'data/few-shot/{VARIATION}/fs-{NUMBER}-{VARIATION}-T0.7.jsonl'
             QUESTION_SET_INDEX_NAME = 'qid'
             QUESTION_SET_ANSWER_NAME = 'answer'
             RESPONSE_INDEX_NAME = 'question_id'
             RESPONSE_SAMPLE_NAME = 'choices'
             EXTRACT_RESPONSE = lambda response: response['message']['content']
             ANSWER_EXTRACTION = extract_stqa
-            COMPARE_ANSWERS = lambda response, answer: response.issubset(set(answer)) and len(response) > 0
+            # COMPARE_ANSWERS = lambda x, y: x.lower() == y.lower()
+            COMPARE_ANSWERS = lambda x, y: (x == 'yes' and y == True) or (x == 'no' and y == False)
+        if DATASET == Dataset.SVAMP:
+            QUESTION_SET_FILE_PATH = f'data/question-set/svamp.json'
+            RESPONSE_FILE_PATH = f'data/responses/{VARIATION}/svamp/sample_0.jsonl'
+            MID_FILE_PATH = f'data/machine-learning/{VARIATION}/svamp.jsonl'
+            QUESTION_SET_INDEX_NAME = 'ID'
+            QUESTION_SET_ANSWER_NAME = 'Answer'
+            RESPONSE_INDEX_NAME = 'question_id'
+            RESPONSE_SAMPLE_NAME = 'choices'
+            EXTRACT_RESPONSE = lambda response: response['message']['content']
+            ANSWER_EXTRACTION = extract_draw
+            COMPARE_ANSWERS = lambda response, answer: response == {float(answer)}
 
         def get_distance(row):
             embeddings = row[EMBEDDING_NAME]
@@ -91,6 +107,9 @@ for DATASET in [
                 # print(index, "Response:", response)
                 # print(index, "Extracted Response: ", ANSWER_EXTRACTION(response))
                 answers.append(ANSWER_EXTRACTION(response))
+                # print(ANSWER_EXTRACTION(response))
+                # print('2',answers[-1] )
+                # print('3',row[QUESTION_SET_ANSWER_NAME] )
                 # print(index, "Answers:", answers)
                 is_correct.append(COMPARE_ANSWERS(answers[-1], row[QUESTION_SET_ANSWER_NAME]))
             row[RESPONSE_ANSWERS_NAME] = answers
@@ -106,7 +125,7 @@ for DATASET in [
 
         def get_majority(row):
             answers = row[RESPONSE_ANSWERS_NAME]
-            if DATASET == DATASET.DRAW:
+            if DATASET == DATASET.DRAW or DATASET == DATASET.SVAMP:
                 answers = [frozenset(answer) for answer in answers] 
             counter = Counter(answers)
             distance = row['distance']

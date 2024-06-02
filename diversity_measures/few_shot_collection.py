@@ -25,6 +25,9 @@ last_letters_df = pandas.read_json(
 stqa_df = pandas.read_json(
     os.path.join("data", "test-sets", "strategyQA.jsonl"), lines=True
 )
+svamp_df = pandas.read_json(
+    os.path.join("data", "test-sets", "svamp.jsonl"), lines=True
+)
 
 draw_few_shots = pandas.read_json(
     os.path.join("data", "prompts", "draw.jsonl"), lines=True
@@ -40,6 +43,12 @@ stqas_few_shots = pandas.read_json(
     os.path.join("data", "prompts", "strategyQA.jsonl"),
     lines=True,
 )
+svamp_few_shots = pandas.read_json(
+    os.path.join("data", "prompts", "svamp.jsonl"), lines=True
+)
+# gsm8k_few_shots = pandas.read_json(
+#     os.path.join("data", "test-sets", "gsm8k.jsonl"), lines=True
+# )
 
 
 def draw_prompt(question_row, few_shots):
@@ -74,12 +83,23 @@ def last_letters_prompt(question_row, few_shots):
     return {"id": index, "text": text}
 
 def stqa_prompt(question_row, few_shots):
-    """A function that is used to format the prompt for the Last Strategy QA dataset."""
+    """A function that is used to format the prompt for the Strategy QA dataset."""
     index = question_row["question_id"]
     text = f"""
 {few_shots['prompt']}
 {question_row['question']}
 """
+    return {"id": index, "text": text}
+
+def svamp_prompt(question_row, few_shots):
+    """A function that is used to format the prompt for the SVAMP dataset."""
+
+    index = question_row["question_id"]
+    text = f"""
+{few_shots['prompt']}
+{question_row['question']}
+Answer: 
+    """.strip()
     return {"id": index, "text": text}
 
 
@@ -107,6 +127,7 @@ for setting_name, setting in [
         # ("csqa", csqa_df, csqa_prompt, csqa_few_shots),
         # ("last_letters", last_letters_df, last_letters_prompt, last_letters_few_shots),
         ("stqa", stqa_df, stqa_prompt, stqas_few_shots),
+        # ("svamp", svamp_df, svamp_prompt, svamp_few_shots),
 
     ]:
         # Collect GPT-3.5 responses for each few-shot variation.
