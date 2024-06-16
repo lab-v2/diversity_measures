@@ -46,6 +46,28 @@ def svamp_prompt(row):
     index = row["ID"]
     return {"text": text, "id": index}
 
+def arc_prompt(row):
+    question_stem = row['question']['stem']
+    choices = row['question']['choices']
+    labels = [choice['label'] for choice in choices]
+
+    if set(labels).issubset({"A", "B", "C", "D", "E"}):
+        prompt = "Answer A, B, C, D or E. At the end, say 'the answer is [put your answer here]'.\n"
+    elif set(labels).issubset({"A", "B", "C", "D"}):
+        prompt = "Answer A, B, C, or D. At the end, say 'the answer is [put your answer here]'.\n"
+    elif set(labels).issubset({"1", "2", "3", "4"}):
+        prompt = "Answer 1, 2, 3, or 4. At the end, say 'the answer is [put your answer here]'.\n"
+    else:
+        prompt = "Answer the question by selecting the appropriate option. At the end, say 'the answer is [put your answer here]'.\n"
+
+    choices_text = ' '.join([f"{choice['label']}) {choice['text']}" for choice in choices])
+    question_text = f"Question: {question_stem}\nChoices: {choices_text}\n"
+    text = f"{prompt}{question_text}"
+    index = row["id"]
+
+    return {"text": text, "id": index}
+
+
 
 
 draw_df = pandas.read_json(
@@ -64,7 +86,9 @@ stqa_df = pandas.read_json(
 svamp_df = pandas.read_json(
     os.path.join("data", "question-set", "svamp.json"), lines=False
 )
-
+arc_df = pandas.read_json(
+    os.path.join("data", "question-set", "ARC-Easy-Test.jsonl"), lines=True
+)
 
 
 draw_df = draw_df.apply(lambda row: draw_prompt(row), axis=1).to_list()
@@ -72,13 +96,14 @@ csqa_df = csqa_df.apply(lambda row: csqa_prompt(row), axis=1).to_list()
 last_letters_df = last_letters_df.apply(lambda row: last_letters_prompt(row), axis=1).to_list()
 stqa_df = stqa_df.apply(lambda row: stqa_prompt(row), axis=1).to_list()
 svamp_df = svamp_df.apply(lambda row: svamp_prompt(row), axis=1).to_list()
+arc_df = arc_df.apply(lambda row: arc_prompt(row), axis=1).to_list()
 
 
 for setting_name, setting in [
-    # ("T0.3", {"temperature": 0.3}),
-    # ("T0.5", {"temperature": 0.5}),
-    # ("T0.7", {"temperature": 0.7}),
-    # ("T0.8", {"temperature": 0.8}),
+    ("T0.3", {"temperature": 0.3}),
+    ("T0.5", {"temperature": 0.5}),
+    ("T0.7", {"temperature": 0.7}),
+    ("T0.8", {"temperature": 0.8}),
     ("T0.9", {"temperature": 0.9}),
 ]:
     TIMEOUT = 10000
@@ -99,8 +124,9 @@ for setting_name, setting in [
         # ("draw", draw_df),
         # ("csqa", csqa_df),
         # ("last_letters", last_letters_df),
-        ("stqa", stqa_df),
+        # ("stqa", stqa_df),
         # ("svamp", svamp_df),
+        ('arc', arc_df),
     ]:
         text = f"Asking {name}"
         text = text + " " * (20 - len(text))

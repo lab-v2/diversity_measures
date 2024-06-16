@@ -12,6 +12,7 @@ import os
 import pandas
 from response_collector import ResponseCollector
 
+# Test set dataframe (100 samples)
 draw_df = pandas.read_json(
     os.path.join("data", "test-sets", "draw.jsonl"), lines=True
 )
@@ -28,7 +29,11 @@ stqa_df = pandas.read_json(
 svamp_df = pandas.read_json(
     os.path.join("data", "test-sets", "svamp.jsonl"), lines=True
 )
+arc_df = pandas.read_json(
+    os.path.join("data", "test-sets", "ARC-Easy-Test.jsonl"), lines=True
+)
 
+# Few shot prompts dataframe"
 draw_few_shots = pandas.read_json(
     os.path.join("data", "prompts", "draw.jsonl"), lines=True
 )
@@ -46,11 +51,11 @@ stqas_few_shots = pandas.read_json(
 svamp_few_shots = pandas.read_json(
     os.path.join("data", "prompts", "svamp.jsonl"), lines=True
 )
-# gsm8k_few_shots = pandas.read_json(
-#     os.path.join("data", "test-sets", "gsm8k.jsonl"), lines=True
-# )
+arc_few_shots = pandas.read_json(
+    os.path.join("data", "prompts", "ARC-Easy-Test.jsonl"), lines=True
+)
 
-
+# Prompt set up for datasets
 def draw_prompt(question_row, few_shots):
     """A function that is used to format the prompt for the DRAW-1K dataset."""
 
@@ -102,6 +107,15 @@ Answer:
     """.strip()
     return {"id": index, "text": text}
 
+def arc_prompt(question_row, few_shots):
+    """A function that is used to format the prompt for the ARC dataset."""
+    index = question_row["question_id"]
+    text = f"""
+{few_shots['prompt']}
+{question_row['question']}
+"""
+    return {"id": index, "text": text}
+
 
 # Collect GPT-3.5 responses at various temperature settings
 for setting_name, setting in [
@@ -126,8 +140,10 @@ for setting_name, setting in [
         # ("draw", draw_df, draw_prompt, draw_few_shots),
         # ("csqa", csqa_df, csqa_prompt, csqa_few_shots),
         # ("last_letters", last_letters_df, last_letters_prompt, last_letters_few_shots),
-        ("stqa", stqa_df, stqa_prompt, stqas_few_shots),
+        # ("stqa", stqa_df, stqa_prompt, stqas_few_shots),
         # ("svamp", svamp_df, svamp_prompt, svamp_few_shots),
+        ("arc", arc_df, arc_prompt, arc_few_shots),
+
 
     ]:
         # Collect GPT-3.5 responses for each few-shot variation.

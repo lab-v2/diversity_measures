@@ -49,6 +49,22 @@ def extract_stqa(response: str):
 
     return response
 
+def extract_arc(response: str):
+    response = response.lower()
+    response = extract_answer(response)
+    
+    # Check for ABCDE or ABCD answers
+    abcde_response = re.findall(r'a|b|c|d|e', response, flags=re.IGNORECASE)
+    if abcde_response:
+        return abcde_response[0]
+    
+    # Check for 1234 answers
+    numeric_response = re.findall(r'1|2|3|4', response)
+    if numeric_response:
+        return numeric_response[0]
+
+    return ''
+
 def extract_answer(response: str) -> str:
     response = __clean_response(response)
 

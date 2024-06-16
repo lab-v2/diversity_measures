@@ -6,7 +6,7 @@ import numpy
 from sentence_transformers import SentenceTransformer
 from scipy.spatial.distance import euclidean
 
-from evals.answer_extraction import extract_last_letters, extract_draw, extract_csqa, extract_stqa
+from evals.answer_extraction import extract_last_letters, extract_draw, extract_csqa, extract_stqa, extract_arc
 from utils.read_file import read_file
 from utils import stats
 
@@ -16,6 +16,7 @@ class Dataset(Enum):
     DRAW = 2
     STQA = 3
     SVAMP = 4
+    ARC = 5
     
 NUM_SAMPLES = 20
 
@@ -24,8 +25,9 @@ for DATASET in [
     # Dataset.LAST_LETTERS,
     # Dataset.CSQA,
     # Dataset.DRAW,
-    Dataset.STQA,
-    Dataset.SVAMP
+    # Dataset.STQA,
+    # Dataset.SVAMP,
+    Dataset.ARC
 ]:
     for VARIATION in [
         'base-T0.3',
@@ -92,6 +94,17 @@ for DATASET in [
                 EXTRACT_RESPONSE = lambda response: response['message']['content']
                 ANSWER_EXTRACTION = extract_draw
                 COMPARE_ANSWERS = lambda response, answer: response == {float(answer)}
+            if DATASET == Dataset.ARC:
+                QUESTION_SET_FILE_PATH = f'data/question-set/ARC-Easy-Test.jsonl'
+                FS_RESPONSE_FILE_PATH = f'data/responses/few_shot-T0.7/arc/sample_{i}.jsonl'
+                FS_MID_FILE_PATH = f'data/few-shot/arc/fs-{i}-svamp-T0.7.jsonl'
+                QUESTION_SET_INDEX_NAME = 'id'
+                QUESTION_SET_ANSWER_NAME = 'answerKey'
+                RESPONSE_INDEX_NAME = 'question_id'
+                RESPONSE_SAMPLE_NAME = 'choices'
+                EXTRACT_RESPONSE = lambda response: response['message']['content']
+                ANSWER_EXTRACTION = extract_arc
+                COMPARE_ANSWERS = lambda x, y: x.lower() == y.lower()
 
             def get_distance(row):
                 embeddings = row[EMBEDDING_NAME]
