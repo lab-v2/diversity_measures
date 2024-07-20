@@ -13,6 +13,3 @@ def read_file(file_path: str):
     if file_extension == 'jsonl': return pandas.read_json(file_path, lines=True)
     if file_extension == 'json': return pandas.read_json(file_path)
     if file_extension == 'csv': return pandas.read_csv(file_path)
-
-def test():
-    print('fuck')
